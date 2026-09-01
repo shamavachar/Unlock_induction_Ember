@@ -19,10 +19,10 @@ export const StaffLayout = () => {
 
   return (
     <div className="app-container">
-      {/* Staff Header Nav */}
+
       <header className="header-nav" style={{ borderBottom: "2px solid #ea580c" }}>
         <div className="header-inner">
-          {/* Staff Brand */}
+
           <Link to="/staff/kitchen" className="brand-logo">
             <ShieldCheck size={22} color="#ea580c" />
             <span>Staff Portal</span>
@@ -34,7 +34,6 @@ export const StaffLayout = () => {
             </span>
           </Link>
 
-          {/* Staff Nav Links */}
           <nav className="nav-links">
             <Link
               to="/staff/kitchen"
@@ -79,7 +78,6 @@ export const StaffLayout = () => {
             </Link>
           </nav>
 
-          {/* Admin User Info & Logout */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>
               Staff ({user?.username || "Admin"})
@@ -95,7 +93,6 @@ export const StaffLayout = () => {
         </div>
       </header>
 
-      {/* Main Staff Content */}
       <main className="main-content">
         <Outlet />
       </main>

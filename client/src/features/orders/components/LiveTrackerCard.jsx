@@ -19,7 +19,7 @@ export const LiveTrackerCard = ({ order }) => {
         background: isReady ? "#f0fdf4" : "var(--color-bg-surface)",
       }}
     >
-      {/* Ready Alert Header */}
+
       {isReady && (
         <div
           style={{
@@ -44,7 +44,6 @@ export const LiveTrackerCard = ({ order }) => {
         </div>
       )}
 
-      {/* Main Token & Queue Position Hero */}
       <div
         style={{
           display: "flex",
@@ -73,7 +72,6 @@ export const LiveTrackerCard = ({ order }) => {
         </div>
       </div>
 
-      {/* Dynamic Queue Position & Estimated Time */}
       {(isWaiting || isPreparing) && (
         <div
           style={{
@@ -114,10 +112,8 @@ export const LiveTrackerCard = ({ order }) => {
         </div>
       )}
 
-      {/* Real-time Status Stepper */}
       <StatusStepper status={order.status} statusHistory={order.statusHistory} />
 
-      {/* Ordered Items List */}
       <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: "1px solid var(--color-border)" }}>
         <h4 style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.75rem" }}>
           Items Ordered ({order.items?.length || 0})

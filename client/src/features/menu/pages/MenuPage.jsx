@@ -50,7 +50,7 @@ export const MenuPage = () => {
 
   return (
     <div style={{ paddingBottom: totalItems > 0 ? "5rem" : "2rem" }}>
-      {/* Header Banner */}
+
       <div
         style={{
           background: "linear-gradient(135deg, #ea580c 0%, #c2410c 100%)",
@@ -89,15 +89,12 @@ export const MenuPage = () => {
         </div>
       </div>
 
-      {/* Search & Filter Bar */}
       <SearchBar />
 
-      {/* Horizontal Category Filter */}
       <div style={{ marginBottom: "1.5rem" }}>
         <CategoryFilter />
       </div>
 
-      {/* Menu Content */}
       {isLoading ? (
         <Loader message="Loading fresh canteen menu..." />
       ) : error ? (
@@ -141,7 +138,6 @@ export const MenuPage = () => {
         </div>
       )}
 
-      {/* Mobile / Sticky Bottom Cart Bar */}
       {totalItems > 0 && (
         <div
           style={{

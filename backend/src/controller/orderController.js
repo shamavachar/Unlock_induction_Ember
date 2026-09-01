@@ -5,45 +5,6 @@ const TokenCounter = require("../models/TokenCounter");
 const { calculateEstimatedWaitTime, getQueuePosition } = require("../utils/queueEstimator");
 const { notifyNewOrder, notifyOrderStatusUpdated, notifyStockUpdated } = require("../sockets/socketHandler");
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  STUDENT FLOW
-//  ┌──────────────┐     ┌──────────────┐     ┌──────────────────────┐
-//  │  View Menu   │────▶│ Select Items │────▶│  POST /api/orders    │
-//  └──────────────┘     └──────────────┘     └──────────┬───────────┘
-//                                                        │
-//                                            ┌───────────▼───────────┐
-//                                            │  Validate Stock Live  │
-//                                            │  Deduct Stock Atomic  │
-//                                            │  Generate Token CR-## │
-//                                            │  Calc Wait Time       │
-//                                            │  Status = "Waiting"   │
-//                                            └───────────┬───────────┘
-//                                                        │ Socket → order:created
-//                                            ┌───────────▼───────────┐
-//                                            │  Track: GET /track/   │
-//                                            │  token  →  status +   │
-//                                            │  queue position       │
-//                                            └───────────────────────┘
-//
-//  STAFF FLOW
-//  Waiting → Preparing → Ready → Completed
-//  (any non-terminal → Cancelled + stock restored)
-//
-//  STOCK FLOW
-//  isAvailable=true & stock > 0  ─▶  order placed  ─▶  stock--
-//  stock == 0  ─▶  isAvailable=false  ─▶  "Out of Stock" on menu
-// ─────────────────────────────────────────────────────────────────────────────
-
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   STUDENT: Place a new food order
-//         • Validates all items are in stock
-//         • Atomically deducts stock (marks Out of Stock when stock hits 0)
-//         • Generates unique daily token number (e.g. CR-101)
-//         • Calculates estimated wait time based on current queue
-//         • Broadcasts new order to staff via Socket.IO
-// @route  POST /api/orders
-// ──────────────────────────────────────────────────────────────────────────────
 exports.createOrder = async (req, res, next) => {
     try {
         const {
@@ -55,7 +16,6 @@ exports.createOrder = async (req, res, next) => {
             notes,
         } = req.body;
 
-        // ── Input validation ──────────────────────────────────────────
         if (!studentName || !studentName.trim()) {
             return res.status(400).json({
                 success: false,
@@ -70,7 +30,6 @@ exports.createOrder = async (req, res, next) => {
             });
         }
 
-        // ── Fetch all requested menu items in one DB call ──────────────
         const itemIds = items.map((i) => i.menuItemId || i._id).filter(Boolean);
         if (itemIds.length !== items.length) {
             return res.status(400).json({
@@ -83,7 +42,6 @@ exports.createOrder = async (req, res, next) => {
         const menuMap = new Map();
         dbMenuItems.forEach((item) => menuMap.set(item._id.toString(), item));
 
-        // ── Validate stock for each item ──────────────────────────────
         const processedItems = [];
         let totalAmount = 0;
 
@@ -100,7 +58,6 @@ exports.createOrder = async (req, res, next) => {
 
             const requestedQty = Number(reqItem.quantity) || 1;
 
-            // Check 1: Is the item marked available at all?
             if (!menuItem.isAvailable) {
                 return res.status(400).json({
                     success: false,
@@ -108,7 +65,6 @@ exports.createOrder = async (req, res, next) => {
                 });
             }
 
-            // Check 2: Is there enough physical stock?
             if (menuItem.stockQuantity <= 0) {
                 return res.status(400).json({
                     success: false,
@@ -135,14 +91,12 @@ exports.createOrder = async (req, res, next) => {
             });
         }
 
-        // ── Atomically deduct stock from MongoDB ──────────────────────
-        // STOCK FLOW: stock-- → if stock == 0 → isAvailable = false → Out of Stock
         for (const item of processedItems) {
-            // findOneAndUpdate with $inc is atomic — safe under concurrent orders
+
             let updatedItem = await MenuItem.findOneAndUpdate(
                 {
                     _id: item.menuItem,
-                    stockQuantity: { $gte: item.quantity }, // guard: only deduct if still enough
+                    stockQuantity: { $gte: item.quantity }, 
                     isAvailable: true,
                 },
                 { $inc: { stockQuantity: -item.quantity } },
@@ -150,15 +104,13 @@ exports.createOrder = async (req, res, next) => {
             );
 
             if (!updatedItem) {
-                // Another concurrent order just grabbed the last stock
+
                 return res.status(409).json({
                     success: false,
                     message: `"${item.name}" just sold out while your order was being processed. Please refresh the menu and try again.`,
                 });
             }
 
-            // If stock hit 0 → mark Out of Stock using another atomic update
-            // (avoids calling .save() on a lean/raw doc which confuses the pre-save hook)
             if (updatedItem.stockQuantity <= 0) {
                 updatedItem = await MenuItem.findByIdAndUpdate(
                     item.menuItem,
@@ -167,7 +119,6 @@ exports.createOrder = async (req, res, next) => {
                 );
             }
 
-            // Broadcast live stock change to all connected clients (menu page refreshes)
             notifyStockUpdated({
                 _id:           updatedItem._id,
                 name:          updatedItem.name,
@@ -176,13 +127,10 @@ exports.createOrder = async (req, res, next) => {
             });
         }
 
-        // ── Generate unique token (CR-101, CR-102, …) ─────────────────
         const tokenNumber = await TokenCounter.getNextToken();
 
-        // ── Calculate estimated wait time ─────────────────────────────
         const estimatedWaitTime = await calculateEstimatedWaitTime(processedItems);
 
-        // ── Create the Order document ──────────────────────────────────
         const order = await Order.create({
             tokenNumber,
             studentName:       studentName.trim(),
@@ -198,12 +146,10 @@ exports.createOrder = async (req, res, next) => {
             notes: notes || "",
         });
 
-        // ── Compute initial queue position ─────────────────────────────
         const queuePosition = await getQueuePosition(order._id, order.createdAt);
 
         const responseData = { ...order.toObject(), queuePosition };
 
-        // ── Broadcast to staff dashboard & display board ───────────────
         notifyNewOrder(responseData);
 
         return res.status(201).json({
@@ -216,14 +162,6 @@ exports.createOrder = async (req, res, next) => {
     }
 };
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   STAFF / STUDENT: Get all orders with filters
-//         Supports: ?status=Waiting|Preparing|Ready|Completed|Cancelled|active|All
-//                   ?search=CR-101 or student name or roll number
-//                   ?page=1&limit=50
-// @route  GET /api/orders
-// ──────────────────────────────────────────────────────────────────────────────
 exports.getOrders = async (req, res, next) => {
     try {
         const { status, search, limit = 50, page = 1 } = req.query;
@@ -231,7 +169,7 @@ exports.getOrders = async (req, res, next) => {
 
         if (status) {
             if (status === "active") {
-                // Active = anything the kitchen is still working on
+
                 query.status = { $in: ["Waiting", "Preparing", "Ready"] };
             } else if (status !== "All") {
                 query.status = status;
@@ -247,7 +185,6 @@ exports.getOrders = async (req, res, next) => {
             ];
         }
 
-        // If a student is fetching orders, scope to their own orders only
         if (req.user && req.user.role === "student") {
             const studentUser = await User.findById(req.user.id);
             if (studentUser) {
@@ -293,11 +230,6 @@ exports.getOrders = async (req, res, next) => {
     }
 };
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   Get a single order by Mongo ID
-// @route  GET /api/orders/:id
-// ──────────────────────────────────────────────────────────────────────────────
 exports.getOrderById = async (req, res, next) => {
     try {
         const order = await Order.findById(req.params.id);
@@ -319,23 +251,15 @@ exports.getOrderById = async (req, res, next) => {
     }
 };
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   STUDENT: Track order by Token Number (CR-101) OR Mongo ObjectId
-//         Returns status, queue position, and wait time estimate
-// @route  GET /api/orders/track/:tokenOrId
-// ──────────────────────────────────────────────────────────────────────────────
 exports.trackOrder = async (req, res, next) => {
     try {
         const { tokenOrId } = req.params;
         let order;
 
-        // Try ObjectId first
         if (/^[0-9a-fA-F]{24}$/.test(tokenOrId)) {
             order = await Order.findById(tokenOrId);
         }
 
-        // Fallback: token number (case-insensitive)
         if (!order) {
             order = await Order.findOne({
                 tokenNumber: { $regex: `^${tokenOrId.trim()}$`, $options: "i" },
@@ -359,7 +283,7 @@ exports.trackOrder = async (req, res, next) => {
             data: {
                 ...order.toObject(),
                 queuePosition,
-                // Friendly status message for student UI
+
                 statusMessage: getStatusMessage(order.status, order.tokenNumber, queuePosition),
             },
         });
@@ -368,7 +292,6 @@ exports.trackOrder = async (req, res, next) => {
     }
 };
 
-/** Returns a human-friendly status description for the student tracking screen */
 function getStatusMessage(status, token, queuePosition) {
     switch (status) {
         case "Waiting":
@@ -388,18 +311,6 @@ function getStatusMessage(status, token, queuePosition) {
     }
 }
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   STAFF: Update order status
-//         Enforces strict transition rules:
-//           Waiting  → Preparing | Cancelled
-//           Preparing → Ready    | Cancelled
-//           Ready    → Completed | Cancelled
-//           Completed / Cancelled → (terminal, no changes allowed)
-//
-//         Broadcasts real-time Socket.IO event to student tracking screens.
-// @route  PATCH /api/orders/:id/status
-// ──────────────────────────────────────────────────────────────────────────────
 exports.updateOrderStatus = async (req, res, next) => {
     try {
         const { status, note } = req.body;
@@ -416,7 +327,6 @@ exports.updateOrderStatus = async (req, res, next) => {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
 
-        // ── Enforce valid transition ───────────────────────────────────
         if (!Order.canTransition(order.status, status)) {
             const allowed = Order.VALID_TRANSITIONS[order.status];
             return res.status(400).json({
@@ -427,7 +337,6 @@ exports.updateOrderStatus = async (req, res, next) => {
             });
         }
 
-        // ── Apply the status change ────────────────────────────────────
         const prevStatus = order.status;
         const now = new Date();
 
@@ -438,7 +347,6 @@ exports.updateOrderStatus = async (req, res, next) => {
             note: note || `Status changed from ${prevStatus} to ${status}`,
         });
 
-        // Record the key timestamps
         if (status === "Preparing")  order.preparingAt  = now;
         if (status === "Ready")      order.readyAt      = now;
         if (status === "Completed") {
@@ -451,7 +359,6 @@ exports.updateOrderStatus = async (req, res, next) => {
 
         await order.save();
 
-        // ── Broadcast to student tracking & staff board ────────────────
         notifyOrderStatusUpdated(order);
 
         return res.status(200).json({
@@ -464,14 +371,6 @@ exports.updateOrderStatus = async (req, res, next) => {
     }
 };
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   STAFF / STUDENT: Cancel an order
-//         • Cannot cancel a Completed order
-//         • Restores stock for all items in the order
-//         • Broadcasts cancellation via Socket.IO
-// @route  PATCH /api/orders/:id/cancel
-// ──────────────────────────────────────────────────────────────────────────────
 exports.cancelOrder = async (req, res, next) => {
     try {
         const { reason } = req.body;
@@ -488,8 +387,6 @@ exports.cancelOrder = async (req, res, next) => {
             });
         }
 
-        // ── Restore stock for every item ──────────────────────────────
-        // STOCK FLOW (reverse): stock++ → if was 0 → isAvailable = true again
         for (const item of order.items) {
             const updatedItem = await MenuItem.findByIdAndUpdate(
                 item.menuItem,
@@ -509,7 +406,6 @@ exports.cancelOrder = async (req, res, next) => {
             }
         }
 
-        // ── Update order ───────────────────────────────────────────────
         const now = new Date();
         order.status             = "Cancelled";
         order.cancellationReason = reason || "Cancelled";

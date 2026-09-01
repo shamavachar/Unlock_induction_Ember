@@ -6,7 +6,6 @@ import { StaffLayout } from "../layouts/StaffLayout";
 import { DisplayLayout } from "../layouts/DisplayLayout";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 
-// Student Pages
 import { MenuPage } from "../features/menu/pages/MenuPage";
 import { CartPage } from "../features/cart/pages/CartPage";
 import { CheckoutPage } from "../features/orders/pages/CheckoutPage";
@@ -16,19 +15,17 @@ import { LoginPage } from "../features/auth/pages/LoginPage";
 import { RegisterPage } from "../features/auth/pages/RegisterPage";
 import { AdminLoginPage } from "../features/auth/pages/AdminLoginPage";
 
-// Staff / Admin Pages
 import { KitchenKanbanPage } from "../features/kitchen/pages/KitchenKanbanPage";
 import { InventoryPage } from "../features/admin/pages/InventoryPage";
 import { AdminDashboardPage } from "../features/admin/pages/AdminDashboardPage";
 
-// Public Kiosk Display Page
 import { LiveDisplayBoardPage } from "../features/display/pages/LiveDisplayBoardPage";
 
 export const router = createBrowserRouter([
   {
     element: <RootLayout />,
     children: [
-      // 1. Student Portal Routes
+
       {
         element: <StudentLayout />,
         children: [
@@ -51,13 +48,11 @@ export const router = createBrowserRouter([
         ],
       },
 
-      // 2. Staff Auth Page (Standalone)
       {
         path: "admin/login",
         element: <AdminLoginPage />,
       },
 
-      // 3. Staff & Kitchen Management Portal
       {
         path: "staff",
         element: (
@@ -73,7 +68,6 @@ export const router = createBrowserRouter([
         ],
       },
 
-      // 4. Public TV Queue Kiosk Display
       {
         path: "display",
         element: <DisplayLayout />,
@@ -82,7 +76,6 @@ export const router = createBrowserRouter([
         ],
       },
 
-      // 5. Fallback route
       {
         path: "*",
         element: <Navigate to="/menu" replace />,

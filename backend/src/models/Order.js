@@ -1,8 +1,5 @@
 const mongoose = require("mongoose");
 
-// ─────────────────────────────────────────────────────────────────
-// Sub-schema: Individual ordered item snapshot (price locked at order time)
-// ─────────────────────────────────────────────────────────────────
 const orderItemSchema = new mongoose.Schema(
     {
         menuItem: {
@@ -16,7 +13,7 @@ const orderItemSchema = new mongoose.Schema(
             trim: true,
         },
         price: {
-            // Price locked at the time of ordering (not live price)
+
             type: Number,
             required: true,
             min: 0,
@@ -27,18 +24,15 @@ const orderItemSchema = new mongoose.Schema(
             min: [1, "Quantity must be at least 1"],
         },
         itemTotal: {
-            // price × quantity — pre-computed for fast display
+
             type: Number,
             required: true,
             min: 0,
         },
     },
-    { _id: false } // No separate _id for embedded items
+    { _id: false } 
 );
 
-// ─────────────────────────────────────────────────────────────────
-// Sub-schema: Status history — logs every status transition with timestamp
-// ─────────────────────────────────────────────────────────────────
 const statusHistorySchema = new mongoose.Schema(
     {
         status: {
@@ -58,15 +52,9 @@ const statusHistorySchema = new mongoose.Schema(
     { _id: false }
 );
 
-// ─────────────────────────────────────────────────────────────────
-// Main Order Schema
-//
-// FLOW: Waiting → Preparing → Ready → Completed
-//                                   ↘ Cancelled (from any except Completed)
-// ─────────────────────────────────────────────────────────────────
 const orderSchema = new mongoose.Schema(
     {
-        // ── Token & Student ──────────────────────────────────────────
+
         tokenNumber: {
             type: String,
             required: [true, "Token number is required"],
@@ -91,7 +79,6 @@ const orderSchema = new mongoose.Schema(
             default: "",
         },
 
-        // ── Items & Billing ──────────────────────────────────────────
         items: {
             type: [orderItemSchema],
             validate: {
@@ -105,20 +92,18 @@ const orderSchema = new mongoose.Schema(
             min: [0, "Total amount cannot be negative"],
         },
 
-        // ── Order Status ─────────────────────────────────────────────
         status: {
             type: String,
             enum: ["Waiting", "Preparing", "Ready", "Completed", "Cancelled"],
             default: "Waiting",
             index: true,
         },
-        // Full audit trail: every status change is recorded here
+
         statusHistory: {
             type: [statusHistorySchema],
             default: [],
         },
 
-        // ── Payment ──────────────────────────────────────────────────
         paymentMethod: {
             type: String,
             enum: ["Cash", "UPI", "Card", "Wallet"],
@@ -130,14 +115,12 @@ const orderSchema = new mongoose.Schema(
             default: "Cash on Counter",
         },
 
-        // ── Queue & Wait Time ────────────────────────────────────────
         estimatedWaitTime: {
-            type: Number, // in minutes
+            type: Number, 
             default: 10,
             min: 0,
         },
 
-        // ── Extra Info ───────────────────────────────────────────────
         notes: {
             type: String,
             trim: true,
@@ -149,29 +132,24 @@ const orderSchema = new mongoose.Schema(
             default: "",
         },
 
-        // ── Key Timestamps ───────────────────────────────────────────
-        // createdAt / updatedAt from timestamps: true
         preparingAt:  { type: Date },
         readyAt:      { type: Date },
         completedAt:  { type: Date },
         cancelledAt:  { type: Date },
     },
     {
-        timestamps: true, // adds createdAt + updatedAt automatically
+        timestamps: true, 
     }
 );
 
-// ── Indexes ──────────────────────────────────────────────────────────────────
-// Fast lookup for staff dashboard (active orders sorted by arrival)
 orderSchema.index({ status: 1, createdAt: 1 });
 
-// ── Static helper: allowed next statuses ─────────────────────────────────────
 orderSchema.statics.VALID_TRANSITIONS = {
     Waiting:    ["Preparing", "Cancelled"],
     Preparing:  ["Ready", "Cancelled"],
     Ready:      ["Completed", "Cancelled"],
-    Completed:  [],           // terminal — no further transitions
-    Cancelled:  [],           // terminal
+    Completed:  [],           
+    Cancelled:  [],           
 };
 
 orderSchema.statics.canTransition = function (from, to) {

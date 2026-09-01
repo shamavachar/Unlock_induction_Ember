@@ -26,7 +26,7 @@ export const CartDrawer = () => {
   return (
     <div className="cart-drawer-overlay" onClick={() => dispatch(toggleCartDrawer(false))}>
       <div className="cart-drawer" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
+
         <div className="cart-drawer-header">
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <ShoppingBag size={20} color="var(--color-primary)" />
@@ -41,7 +41,6 @@ export const CartDrawer = () => {
           </button>
         </div>
 
-        {/* Body */}
         <div className="cart-drawer-body">
           {items.length === 0 ? (
             <div
@@ -69,7 +68,6 @@ export const CartDrawer = () => {
                 ))}
               </div>
 
-              {/* Kitchen Instructions */}
               <div style={{ marginTop: "1rem" }}>
                 <label className="form-label" style={{ fontSize: "0.8rem" }}>
                   Special Instructions for Kitchen:
@@ -84,7 +82,6 @@ export const CartDrawer = () => {
                 />
               </div>
 
-              {/* Time Estimate Box */}
               <div
                 style={{
                   display: "flex",
@@ -106,7 +103,6 @@ export const CartDrawer = () => {
           )}
         </div>
 
-        {/* Footer */}
         {items.length > 0 && (
           <div className="cart-drawer-footer">
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>

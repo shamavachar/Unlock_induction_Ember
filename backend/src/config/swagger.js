@@ -229,7 +229,7 @@ const swaggerOptions = {
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
 const setupSwagger = (app) => {
-    // Custom options for Swagger UI
+
     const customOptions = {
         customCss: `
             .swagger-ui .topbar { background-color: #0f172a; border-bottom: 2px solid #3b82f6; }
@@ -239,10 +239,8 @@ const setupSwagger = (app) => {
         customSiteTitle: "Canteen Rush Manager - API Docs",
     };
 
-    // Serve interactive Swagger UI
     app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, customOptions));
 
-    // Serve raw JSON spec
     app.get("/api-docs.json", (req, res) => {
         res.setHeader("Content-Type", "application/json");
         res.send(swaggerSpec);

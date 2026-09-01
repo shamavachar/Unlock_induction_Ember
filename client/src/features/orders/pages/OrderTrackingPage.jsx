@@ -15,7 +15,6 @@ export const OrderTrackingPage = () => {
   const [searchToken, setSearchToken] = useState(tokenNumber || "");
   const { activeTrackedOrder, isLoading, error } = useSelector((state) => state.orders);
 
-  // Fetch and connect to socket room whenever token changes
   useEffect(() => {
     if (tokenNumber) {
       dispatch(trackOrderThunk(tokenNumber));
@@ -36,7 +35,7 @@ export const OrderTrackingPage = () => {
 
   return (
     <div style={{ maxWidth: "680px", margin: "0 auto", paddingBottom: "3rem" }}>
-      {/* Top Bar Navigation */}
+
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
         <Link
           to="/menu"
@@ -67,7 +66,6 @@ export const OrderTrackingPage = () => {
         </Link>
       </div>
 
-      {/* Search Bar for Other Tokens */}
       <form onSubmit={handleSearch} style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
         <div style={{ position: "relative", flex: 1 }}>
           <Search size={16} style={{ position: "absolute", left: "12px", top: "12px", color: "var(--color-text-muted)" }} />
@@ -85,7 +83,6 @@ export const OrderTrackingPage = () => {
         </button>
       </form>
 
-      {/* Tracking Card Content */}
       {isLoading && !activeTrackedOrder ? (
         <Loader message="Tracking your token..." />
       ) : error ? (

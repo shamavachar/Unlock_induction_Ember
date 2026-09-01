@@ -1,14 +1,12 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-// ── Helper: Generate JWT Token ────────────────────────────────────────────────
 const generateToken = (payload) => {
     return jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN || "7d",
     });
 };
 
-// ── Helper: Build safe user response (no password) ───────────────────────────
 const userResponse = (user) => ({
     _id: user._id,
     name: user.name,
@@ -19,11 +17,6 @@ const userResponse = (user) => ({
     createdAt: user.createdAt,
 });
 
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   STUDENT: Register a new account
-// @route  POST /api/auth/register
-// @access Public
-// ──────────────────────────────────────────────────────────────────────────────
 exports.registerStudent = async (req, res, next) => {
     try {
         const { name, email, password, phone, rollNumber } = req.body;
@@ -68,11 +61,6 @@ exports.registerStudent = async (req, res, next) => {
     }
 };
 
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   STUDENT: Login with email + password
-// @route  POST /api/auth/login
-// @access Public
-// ──────────────────────────────────────────────────────────────────────────────
 exports.loginStudent = async (req, res, next) => {
     try {
         const { email, password } = req.body;
@@ -110,12 +98,6 @@ exports.loginStudent = async (req, res, next) => {
     }
 };
 
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   ADMIN/STAFF: Login with predefined credentials
-//         No signup — credentials configured in .env (ADMIN_USERNAME & ADMIN_PASSWORD)
-// @route  POST /api/auth/admin/login
-// @access Public
-// ──────────────────────────────────────────────────────────────────────────────
 exports.loginAdmin = async (req, res, next) => {
     try {
         const { username, password } = req.body;
@@ -153,11 +135,6 @@ exports.loginAdmin = async (req, res, next) => {
     }
 };
 
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   Get currently logged-in user profile
-// @route  GET /api/auth/me
-// @access Protected (Student or Admin)
-// ──────────────────────────────────────────────────────────────────────────────
 exports.getMe = async (req, res, next) => {
     try {
         if (req.user.role === "admin") {

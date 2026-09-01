@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authService } from "../../services/authService";
 
-// Helper to get initial state from localStorage safely
 const getInitialStoredState = () => {
   try {
     const userStr = localStorage.getItem("user");
@@ -30,7 +29,7 @@ export const registerStudentThunk = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await authService.registerStudent(userData);
-      // Backend returns { success: true, token, user, message }
+
       return response.token ? response : (response.data || response);
     } catch (error) {
       return rejectWithValue(error.message);
@@ -43,7 +42,7 @@ export const loginStudentThunk = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authService.loginStudent(credentials);
-      // Backend returns { success: true, token, user, message }
+
       return response.token ? response : (response.data || response);
     } catch (error) {
       return rejectWithValue(error.message);
@@ -56,7 +55,7 @@ export const loginAdminThunk = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authService.loginAdmin(credentials);
-      // Backend returns { success: true, token, admin, message }
+
       return response.token ? response : (response.data || response);
     } catch (error) {
       return rejectWithValue(error.message);
@@ -103,7 +102,7 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Register
+
     builder
       .addCase(registerStudentThunk.pending, (state) => {
         state.isLoading = true;
@@ -127,7 +126,6 @@ const authSlice = createSlice({
         state.error = action.payload || "Registration failed. Please check your details.";
       });
 
-    // Student Login
     builder
       .addCase(loginStudentThunk.pending, (state) => {
         state.isLoading = true;
@@ -151,7 +149,6 @@ const authSlice = createSlice({
         state.error = action.payload || "Login failed. Please check your credentials.";
       });
 
-    // Admin Login
     builder
       .addCase(loginAdminThunk.pending, (state) => {
         state.isLoading = true;
@@ -175,7 +172,6 @@ const authSlice = createSlice({
         state.error = action.payload || "Admin login failed.";
       });
 
-    // Get Me
     builder
       .addCase(getMeThunk.fulfilled, (state, action) => {
         if (action.payload) {

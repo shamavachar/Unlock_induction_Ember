@@ -2,17 +2,16 @@ const mongoose = require("mongoose");
 
 const tokenCounterSchema = new mongoose.Schema({
     date: {
-        type: String, // YYYY-MM-DD format
+        type: String, 
         required: true,
         unique: true,
     },
     seq: {
         type: Number,
-        default: 100, // Starts at 101 for friendly tokens (e.g. CR-101)
+        default: 100, 
     },
 });
 
-// Helper static method to get next token number atomically
 tokenCounterSchema.statics.getNextToken = async function () {
     const today = new Date().toISOString().slice(0, 10);
     const counter = await this.findOneAndUpdate(

@@ -90,7 +90,6 @@ export const StatusStepper = ({ status, statusHistory = [] }) => {
           );
         })}
 
-        {/* Connecting line */}
         <div
           style={{
             position: "absolute",

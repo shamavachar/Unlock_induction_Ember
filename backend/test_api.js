@@ -1,18 +1,3 @@
-/**
- * Full Flow Verification Test
- *
- * Tests the complete system flow exactly as described:
- *
- * STUDENT FLOW:
- *   View Menu → Select Food → Place Order → Token → Waiting → Preparing → Ready → Completed
- *
- * STAFF FLOW:
- *   View Orders → Preparing → Ready → Completed
- *
- * STOCK FLOW:
- *   Available → Order Placed → Stock Decreases → Stock = 0 → Out of Stock
- */
-
 const http = require("http");
 const dotenv = require("dotenv");
 dotenv.config();
@@ -21,7 +6,6 @@ const app       = require("./src/app");
 const connectDB = require("./src/config/db");
 const { initSocket } = require("./src/sockets/socketHandler");
 
-// Helper: print section headers
 const section = (title) =>
     console.log(`\n${"═".repeat(60)}\n  ${title}\n${"═".repeat(60)}`);
 
@@ -46,13 +30,12 @@ async function runTests() {
     };
 
     try {
-        // ────────────────────────────────────────────────────────────
+
         section("HEALTH CHECK");
         const health = await req("GET", "/health");
         if (health.status !== 200) err("Health check failed");
         ok("API is healthy and all endpoint docs loaded");
 
-        // ────────────────────────────────────────────────────────────
         section("STUDENT: VIEW FOOD MENU");
         const menuAll = await req("GET", "/menu?availableOnly=true");
         if (!menuAll.data.data || menuAll.data.data.length === 0) err("Menu is empty");
@@ -64,12 +47,10 @@ async function runTests() {
         const firstItem = menuAll.data.data[0];
         ok(`First item: "${firstItem.name}" | ₹${firstItem.price} | Stock: ${firstItem.stockQuantity}`);
 
-        // ────────────────────────────────────────────────────────────
         section("STOCK FLOW: Check initial stock before order");
         const stockBefore = firstItem.stockQuantity;
         ok(`"${firstItem.name}" stock BEFORE order: ${stockBefore}`);
 
-        // ────────────────────────────────────────────────────────────
         section("STUDENT: SELECT FOOD & PLACE ORDER");
         const orderRes = await req("POST", "/orders", {
             studentName:       "Priya Singh",
@@ -90,7 +71,6 @@ async function runTests() {
         ok(`Total: ₹${order.totalAmount}`);
         if (order.status !== "Waiting") err("Initial status must be Waiting");
 
-        // ────────────────────────────────────────────────────────────
         section("STOCK FLOW: Verify stock decreased after order");
         const menuAfter = await req("GET", `/menu/${firstItem._id}`);
         const stockAfter = menuAfter.data.data.stockQuantity;
@@ -99,20 +79,17 @@ async function runTests() {
         if (stockAfter !== expectedStock) err(`Stock mismatch! Expected ${expectedStock}, got ${stockAfter}`);
         ok("Stock decreased correctly ✓");
 
-        // ────────────────────────────────────────────────────────────
         section("STUDENT: TRACK ORDER BY TOKEN");
         const trackRes = await req("GET", `/orders/track/${order.tokenNumber}`);
         if (trackRes.status !== 200) err("Order tracking failed");
         ok(`Tracking token "${order.tokenNumber}" — Status: ${trackRes.data.data.status}`);
         ok(`Status message: "${trackRes.data.data.statusMessage}"`);
 
-        // ────────────────────────────────────────────────────────────
         section("STAFF: VIEW ACTIVE ORDERS");
         const activeOrders = await req("GET", "/orders?status=active");
         if (activeOrders.data.count === 0) err("No active orders found for staff dashboard");
         ok(`Staff sees ${activeOrders.data.count} active order(s)`);
 
-        // ────────────────────────────────────────────────────────────
         section("STAFF: MOVE ORDER → Preparing");
         const prepRes = await req("PATCH", `/orders/${order._id}/status`, {
             status: "Preparing",
@@ -122,12 +99,10 @@ async function runTests() {
         ok(`Order ${prepRes.data.data.tokenNumber} → ${prepRes.data.data.status}`);
         ok(`preparingAt recorded: ${prepRes.data.data.preparingAt}`);
 
-        // ── Verify invalid transition is rejected ──────────────────
         const badJump = await req("PATCH", `/orders/${order._id}/status`, { status: "Completed" });
         if (badJump.status !== 400) err("Should have rejected Preparing → Completed (not an allowed transition)");
         ok(`Invalid jump "Preparing → Completed" correctly rejected`);
 
-        // ────────────────────────────────────────────────────────────
         section("STAFF: MOVE ORDER → Ready");
         const readyRes = await req("PATCH", `/orders/${order._id}/status`, {
             status: "Ready",
@@ -137,11 +112,9 @@ async function runTests() {
         ok(`Order ${readyRes.data.data.tokenNumber} → ${readyRes.data.data.status}`);
         ok(`readyAt recorded: ${readyRes.data.data.readyAt}`);
 
-        // ── Student tracking should now show READY ─────────────────
         const trackReady = await req("GET", `/orders/track/${order.tokenNumber}`);
         ok(`Student tracking: "${trackReady.data.data.statusMessage}"`);
 
-        // ────────────────────────────────────────────────────────────
         section("DISPLAY BOARD: LIVE QUEUE");
         const liveQueue = await req("GET", "/queue/live");
         ok(`Ready to collect: ${liveQueue.data.data.summary.readyCount} order(s)`);
@@ -150,7 +123,6 @@ async function runTests() {
         if (liveQueue.data.data.ready.length === 0) err("Ready queue should have our order");
         ok(`Display board: "${liveQueue.data.data.ready[0].tokenNumber}" — ${liveQueue.data.data.ready[0].itemSummary}`);
 
-        // ────────────────────────────────────────────────────────────
         section("STAFF: MOVE ORDER → Completed");
         const doneRes = await req("PATCH", `/orders/${order._id}/status`, {
             status: "Completed",
@@ -164,18 +136,16 @@ async function runTests() {
             doneRes.data.data.statusHistory.map(h => h.status).join(" → ")
         }`);
 
-        // ── Verify terminal state cannot be moved again ────────────
         const afterDone = await req("PATCH", `/orders/${order._id}/status`, { status: "Cancelled" });
         if (afterDone.status !== 400) err("Completed order should not be moveable");
         ok(`Completed order correctly rejects further changes`);
 
-        // ────────────────────────────────────────────────────────────
         section("STOCK FLOW: Test Out of Stock");
-        // Find an item and drain its stock via multiple orders
+
         const snack = menuAll.data.data.find(i => i.stockQuantity <= 5 && i.stockQuantity > 0) 
                    || menuAll.data.data[1];
         if (snack) {
-            // Place order for all remaining stock
+
             const drainRes = await req("POST", "/orders", {
                 studentName: "Test Student",
                 items: [{ menuItemId: snack._id, quantity: snack.stockQuantity }],
@@ -187,7 +157,7 @@ async function runTests() {
                 if (drained.stockQuantity === 0) {
                     ok(`STOCK FLOW: stock hit 0 → isAvailable = false (Out of Stock) ✓`);
                 }
-                // Verify new order is rejected for out-of-stock item
+
                 const blockedOrder = await req("POST", "/orders", {
                     studentName: "Late Student",
                     items: [{ menuItemId: snack._id, quantity: 1 }],
@@ -198,7 +168,6 @@ async function runTests() {
             }
         }
 
-        // ────────────────────────────────────────────────────────────
         section("STAFF: Cancel flow + stock restore");
         const cancelOrder2 = await req("POST", "/orders", {
             studentName: "Cancel Test",
@@ -215,7 +184,6 @@ async function runTests() {
             }
         }
 
-        // ────────────────────────────────────────────────────────────
         section("DASHBOARD STATS");
         const stats = await req("GET", "/stats/dashboard");
         const d = stats.data.data.today;
@@ -228,7 +196,6 @@ async function runTests() {
         const inv = stats.data.data.inventory;
         ok(`Inventory: ${inv.totalItems} items | Out of stock: ${inv.outOfStock}`);
 
-        // ────────────────────────────────────────────────────────────
         section("ORGANIZER TWIST: CHAOS MODE");
         const chaosRes = await req("POST", "/menu/chaos-mode", {
             stockPerItem: 5,
@@ -238,11 +205,10 @@ async function runTests() {
         ok(chaosRes.data.data.announcement);
         ok(`${chaosRes.data.data.remainingCount} item(s) kept active:`);
         chaosRes.data.data.remainingItems.forEach(i => ok(`  • ${i.name} (stock: ${i.stock})`));
-        // Verify menu now has mostly out-of-stock items
+
         const afterChaos = await req("GET", "/menu?availableOnly=true");
         ok(`Available items after Chaos Mode: ${afterChaos.data.count} (should be 3)`);
 
-        // ────────────────────────────────────────────────────────────
         section("🎉 ALL TESTS PASSED");
         console.log(`
   ┌─────────────────────────────────────────────────────┐

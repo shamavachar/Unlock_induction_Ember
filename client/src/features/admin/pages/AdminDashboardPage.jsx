@@ -19,7 +19,7 @@ export const AdminDashboardPage = () => {
 
   return (
     <div style={{ paddingBottom: "3rem" }}>
-      {/* Top Header */}
+
       <div
         style={{
           display: "flex",
@@ -67,12 +67,11 @@ export const AdminDashboardPage = () => {
         </div>
       ) : (
         <>
-          {/* Top 4 KPI Cards */}
+
           <StatCards today={today} inventory={inventory} />
 
-          {/* 2-Column Section: Top Items + Low Stock Alert */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginTop: "1.5rem" }}>
-            {/* Top Selling Items */}
+
             <div className="card">
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
                 <TrendingUp size={20} color="var(--color-primary)" />
@@ -110,7 +109,6 @@ export const AdminDashboardPage = () => {
               )}
             </div>
 
-            {/* Low Stock Warning Box */}
             <div className="card">
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
                 <Layers size={20} color="#dc2626" />
@@ -150,7 +148,6 @@ export const AdminDashboardPage = () => {
         </>
       )}
 
-      {/* Rush Hour Modal */}
       <ChaosModeModal
         isOpen={isChaosModalOpen}
         onClose={() => setIsChaosModalOpen(false)}

@@ -22,7 +22,7 @@ export const LiveDisplayBoardPage = () => {
 
   return (
     <div className="tv-display-container">
-      {/* Header Bar */}
+
       <header
         style={{
           display: "flex",
@@ -57,7 +57,6 @@ export const LiveDisplayBoardPage = () => {
           </div>
         </div>
 
-        {/* Live Metrics & Clock */}
         <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
           <div style={{ textAlign: "right" }}>
             <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>Average Wait Time</span>
@@ -89,9 +88,8 @@ export const LiveDisplayBoardPage = () => {
         </div>
       </header>
 
-      {/* Main Split Grid */}
       <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: "1.5rem", flex: 1 }}>
-        {/* LEFT COLUMN: NOW SERVING / READY */}
+
         <div
           style={{
             background: "#064e3b",
@@ -187,9 +185,8 @@ export const LiveDisplayBoardPage = () => {
           )}
         </div>
 
-        {/* RIGHT COLUMN: PREPARING & UP NEXT */}
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-          {/* Top Half: Preparing in Kitchen */}
+
           <div
             style={{
               background: "#451a03",
@@ -245,7 +242,6 @@ export const LiveDisplayBoardPage = () => {
             </div>
           </div>
 
-          {/* Bottom Half: Waiting in Queue */}
           <div
             style={{
               background: "#0c2340",
@@ -302,7 +298,6 @@ export const LiveDisplayBoardPage = () => {
         </div>
       </div>
 
-      {/* Live Marquee Footer */}
       <footer
         style={{
           marginTop: "1.25rem",

@@ -130,7 +130,7 @@ const menuSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Fetch Items
+
     builder
       .addCase(fetchMenuItemsThunk.pending, (state) => {
         state.isLoading = true;
@@ -145,12 +145,10 @@ const menuSlice = createSlice({
         state.error = action.payload;
       });
 
-    // Fetch Categories
     builder.addCase(fetchCategoriesThunk.fulfilled, (state, action) => {
       state.categories = Array.isArray(action.payload) ? action.payload : ["All"];
     });
 
-    // Toggle Availability
     builder.addCase(toggleItemAvailabilityThunk.fulfilled, (state, action) => {
       if (action.payload && action.payload._id) {
         const index = state.items.findIndex((i) => i._id === action.payload._id);
@@ -160,7 +158,6 @@ const menuSlice = createSlice({
       }
     });
 
-    // Update Stock
     builder.addCase(updateItemStockThunk.fulfilled, (state, action) => {
       if (action.payload && action.payload._id) {
         const index = state.items.findIndex((i) => i._id === action.payload._id);
@@ -170,14 +167,12 @@ const menuSlice = createSlice({
       }
     });
 
-    // Create Item
     builder.addCase(createMenuItemThunk.fulfilled, (state, action) => {
       if (action.payload && action.payload._id) {
         state.items.unshift(action.payload);
       }
     });
 
-    // Update Item
     builder.addCase(updateMenuItemThunk.fulfilled, (state, action) => {
       if (action.payload && action.payload._id) {
         const index = state.items.findIndex((i) => i._id === action.payload._id);
@@ -187,7 +182,6 @@ const menuSlice = createSlice({
       }
     });
 
-    // Delete Item
     builder.addCase(deleteMenuItemThunk.fulfilled, (state, action) => {
       state.items = state.items.filter((i) => i._id !== action.payload);
     });

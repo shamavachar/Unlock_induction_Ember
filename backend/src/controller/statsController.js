@@ -1,17 +1,9 @@
 const Order = require("../models/Order");
 const MenuItem = require("../models/MenuItem");
 
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   Get staff dashboard analytics
-//         • Today's total orders & revenue
-//         • Order breakdown by status (Waiting/Preparing/Ready/Completed/Cancelled)
-//         • Top 5 best-selling items today
-//         • Inventory: out-of-stock count, low-stock items
-// @route  GET /api/stats/dashboard
-// ──────────────────────────────────────────────────────────────────────────────
 exports.getDashboardStats = async (req, res, next) => {
     try {
-        // Start of today (midnight local → UTC)
+
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
 
@@ -24,16 +16,14 @@ exports.getDashboardStats = async (req, res, next) => {
             totalMenuItems,
             topSellingItems,
         ] = await Promise.all([
-            // Count all orders placed today
+
             Order.countDocuments({ createdAt: { $gte: todayStart } }),
 
-            // Status breakdown
             Order.aggregate([
                 { $match: { createdAt: { $gte: todayStart } } },
                 { $group: { _id: "$status", count: { $sum: 1 } } },
             ]),
 
-            // Revenue (exclude cancelled orders)
             Order.aggregate([
                 {
                     $match: {
@@ -44,18 +34,14 @@ exports.getDashboardStats = async (req, res, next) => {
                 { $group: { _id: null, total: { $sum: "$totalAmount" } } },
             ]),
 
-            // Count how many items are fully out of stock
             MenuItem.countDocuments({ $or: [{ isAvailable: false }, { stockQuantity: 0 }] }),
 
-            // List items with 5 or fewer portions remaining (warn staff)
             MenuItem.find({ isAvailable: true, stockQuantity: { $gt: 0, $lte: 5 } })
                 .select("name stockQuantity category")
                 .sort({ stockQuantity: 1 }),
 
-            // Total items on the menu
             MenuItem.countDocuments(),
 
-            // Top 5 best-selling items today (by quantity sold)
             Order.aggregate([
                 {
                     $match: {
@@ -76,7 +62,6 @@ exports.getDashboardStats = async (req, res, next) => {
             ]),
         ]);
 
-        // Build status map from aggregation result
         const statusBreakdown = {
             Waiting:   0,
             Preparing: 0,

@@ -15,7 +15,7 @@ export const KanbanColumn = ({ title, count, orders = [], color, icon }) => {
         maxHeight: "calc(100vh - 160px)",
       }}
     >
-      {/* Column Header */}
+
       <div
         style={{
           padding: "0.85rem 1rem",
@@ -45,7 +45,6 @@ export const KanbanColumn = ({ title, count, orders = [], color, icon }) => {
         </span>
       </div>
 
-      {/* Orders Scroll Container */}
       <div
         style={{
           padding: "0.85rem",

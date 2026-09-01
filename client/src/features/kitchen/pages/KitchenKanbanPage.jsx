@@ -21,7 +21,6 @@ export const KitchenKanbanPage = () => {
     };
   }, [dispatch]);
 
-  // Filter orders by search term
   const filteredOrders = staffOrders.filter((order) => {
     if (!searchTerm.trim()) return true;
     const term = searchTerm.toLowerCase();
@@ -39,7 +38,7 @@ export const KitchenKanbanPage = () => {
 
   return (
     <div style={{ paddingBottom: "2rem" }}>
-      {/* Top Operations Control Bar */}
+
       <div
         style={{
           display: "flex",
@@ -58,7 +57,7 @@ export const KitchenKanbanPage = () => {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          {/* Quick Search */}
+
           <div style={{ position: "relative" }}>
             <Search size={15} style={{ position: "absolute", left: "10px", top: "10px", color: "var(--color-text-muted)" }} />
             <input
@@ -88,7 +87,6 @@ export const KitchenKanbanPage = () => {
         </div>
       </div>
 
-      {/* Main Kanban Columns Grid */}
       {isLoading && staffOrders.length === 0 ? (
         <Loader message="Loading kitchen queue..." />
       ) : error ? (

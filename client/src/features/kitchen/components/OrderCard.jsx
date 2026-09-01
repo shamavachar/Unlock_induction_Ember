@@ -20,7 +20,6 @@ export const OrderCard = ({ order }) => {
     }
   };
 
-  // Calculate elapsed minutes since order creation
   const elapsedMinutes = Math.floor(
     (new Date() - new Date(order.createdAt)) / (1000 * 60)
   );
@@ -41,7 +40,7 @@ export const OrderCard = ({ order }) => {
             : "4px solid #94a3b8",
       }}
     >
-      {/* Top Card Header */}
+
       <div
         style={{
           display: "flex",
@@ -70,7 +69,6 @@ export const OrderCard = ({ order }) => {
         </span>
       </div>
 
-      {/* Student Details */}
       <div style={{ fontSize: "0.8rem", color: "var(--color-text-muted)", marginBottom: "0.5rem" }}>
         <p style={{ fontWeight: 600, color: "var(--color-text-main)", display: "flex", alignItems: "center", gap: "4px" }}>
           <User size={13} /> {order.studentName} {order.studentRollNumber ? `(${order.studentRollNumber})` : ""}
@@ -82,7 +80,6 @@ export const OrderCard = ({ order }) => {
         )}
       </div>
 
-      {/* Items List */}
       <div
         style={{
           background: "var(--color-bg-subtle)",
@@ -125,7 +122,6 @@ export const OrderCard = ({ order }) => {
         )}
       </div>
 
-      {/* Action Buttons based on status */}
       <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
         {order.status === "Waiting" && (
           <>

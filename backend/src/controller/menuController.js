@@ -1,58 +1,28 @@
 const MenuItem = require("../models/MenuItem");
 const { notifyStockUpdated, notifyChaosAlert } = require("../sockets/socketHandler");
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  MENU CONTROLLER
-//
-//  STOCK FLOW:
-//    Staff adds item (stockQuantity > 0)  →  isAvailable = true
-//    Order placed                         →  stockQuantity-- (atomic)
-//    stockQuantity hits 0                 →  isAvailable = false  (Out of Stock)
-//    Staff restocks via PATCH /:id/stock  →  isAvailable = true
-//    Staff toggles  via PATCH /:id/toggle →  manual override
-//
-//  CHAOS TWIST (60-min hack twist):
-//    POST /api/menu/chaos-mode            →  only 3 items remain in stock
-// ─────────────────────────────────────────────────────────────────────────────
-
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   STUDENT: View available food menu
-//         Returns all menu items with live stock status.
-//         Query params:
-//           ?availableOnly=true  – only show in-stock items (use for student order screen)
-//           ?category=Snacks|Meals|Beverages|Fast Food|South Indian|Desserts|Other
-//           ?isVeg=true|false
-//           ?search=burger
-// @route  GET /api/menu
-// ──────────────────────────────────────────────────────────────────────────────
 exports.getMenuItems = async (req, res, next) => {
     try {
         const { category, availableOnly, search, isVeg } = req.query;
         const query = {};
 
-        // Filter: category
         if (category && category !== "All") {
             query.category = category;
         }
 
-        // Filter: only show items students can actually order
         if (availableOnly === "true") {
             query.isAvailable   = true;
             query.stockQuantity = { $gt: 0 };
         }
 
-        // Filter: veg / non-veg
         if (isVeg !== undefined) {
             query.isVeg = isVeg === "true";
         }
 
-        // Filter: name search
         if (search && search.trim()) {
             query.name = { $regex: search.trim(), $options: "i" };
         }
 
-        // Sort: available first → popular first → alphabetical
         const items = await MenuItem.find(query).sort({
             isAvailable: -1,
             isPopular:   -1,
@@ -69,11 +39,6 @@ exports.getMenuItems = async (req, res, next) => {
     }
 };
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   Get all available categories (for building filter tabs on the menu page)
-// @route  GET /api/menu/categories
-// ──────────────────────────────────────────────────────────────────────────────
 exports.getCategories = async (req, res, next) => {
     try {
         const categories = await MenuItem.distinct("category");
@@ -86,11 +51,6 @@ exports.getCategories = async (req, res, next) => {
     }
 };
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   Get single menu item by ID
-// @route  GET /api/menu/:id
-// ──────────────────────────────────────────────────────────────────────────────
 exports.getMenuItemById = async (req, res, next) => {
     try {
         const item = await MenuItem.findById(req.params.id);
@@ -103,12 +63,6 @@ exports.getMenuItemById = async (req, res, next) => {
     }
 };
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   STAFF: Add a new food item to the menu
-//         Sets isAvailable based on initial stockQuantity
-// @route  POST /api/menu
-// ──────────────────────────────────────────────────────────────────────────────
 exports.createMenuItem = async (req, res, next) => {
     try {
         const {
@@ -132,13 +86,12 @@ exports.createMenuItem = async (req, res, next) => {
             category,
             image,
             stockQuantity:          qty,
-            isAvailable:            qty > 0,     // auto-derive availability from initial stock
+            isAvailable:            qty > 0,     
             preparationTimeMinutes: Number(preparationTimeMinutes) || 5,
             isVeg:                  isVeg !== undefined ? Boolean(isVeg) : true,
             isPopular:              Boolean(isPopular) || false,
         });
 
-        // Notify all clients that a new item appeared on the menu
         notifyStockUpdated(item);
 
         return res.status(201).json({
@@ -151,14 +104,6 @@ exports.createMenuItem = async (req, res, next) => {
     }
 };
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   STAFF: Update menu item details (name, price, description, etc.)
-//         Automatically syncs isAvailable if stockQuantity is changed:
-//           qty = 0  →  isAvailable = false
-//           qty > 0  →  isAvailable = true (unless staff explicitly sets it false)
-// @route  PUT /api/menu/:id
-// ──────────────────────────────────────────────────────────────────────────────
 exports.updateMenuItem = async (req, res, next) => {
     try {
         const item = await MenuItem.findById(req.params.id);
@@ -166,15 +111,14 @@ exports.updateMenuItem = async (req, res, next) => {
             return res.status(404).json({ success: false, message: "Menu item not found" });
         }
 
-        // If stockQuantity is being changed, auto-sync isAvailable
         if (req.body.stockQuantity !== undefined) {
             const qty = Number(req.body.stockQuantity);
             req.body.stockQuantity = qty;
             if (qty <= 0) {
                 req.body.stockQuantity = 0;
-                req.body.isAvailable   = false; // force out of stock
+                req.body.isAvailable   = false; 
             } else if (req.body.isAvailable === undefined) {
-                req.body.isAvailable = true;    // bring back if restocked and not manually overridden
+                req.body.isAvailable = true;    
             }
         }
 
@@ -195,14 +139,6 @@ exports.updateMenuItem = async (req, res, next) => {
     }
 };
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   STAFF: Instantly toggle an item available / out of stock
-//         (One-tap button on staff dashboard to hide/show an item during rush)
-//         NOTE: This only flips isAvailable — does NOT touch stockQuantity.
-//               Use /stock endpoint to actually change inventory numbers.
-// @route  PATCH /api/menu/:id/toggle
-// ──────────────────────────────────────────────────────────────────────────────
 exports.toggleAvailability = async (req, res, next) => {
     try {
         const item = await MenuItem.findById(req.params.id);
@@ -230,14 +166,6 @@ exports.toggleAvailability = async (req, res, next) => {
     }
 };
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   STAFF: Restock / update stock quantity for an item
-//         STOCK FLOW:
-//           If qty > 0  → isAvailable = true  (item appears on student menu)
-//           If qty = 0  → isAvailable = false (item disappears: Out of Stock)
-// @route  PATCH /api/menu/:id/stock
-// ──────────────────────────────────────────────────────────────────────────────
 exports.updateStock = async (req, res, next) => {
     try {
         const qty = Number(req.body.stockQuantity);
@@ -257,7 +185,7 @@ exports.updateStock = async (req, res, next) => {
         const wasOutOfStock = !item.isAvailable || item.stockQuantity <= 0;
 
         item.stockQuantity = qty;
-        item.isAvailable   = qty > 0; // auto-sync
+        item.isAvailable   = qty > 0; 
         await item.save();
 
         notifyStockUpdated({
@@ -279,11 +207,6 @@ exports.updateStock = async (req, res, next) => {
     }
 };
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   STAFF: Delete a menu item permanently
-// @route  DELETE /api/menu/:id
-// ──────────────────────────────────────────────────────────────────────────────
 exports.deleteMenuItem = async (req, res, next) => {
     try {
         const item = await MenuItem.findByIdAndDelete(req.params.id);
@@ -291,7 +214,6 @@ exports.deleteMenuItem = async (req, res, next) => {
             return res.status(404).json({ success: false, message: "Menu item not found" });
         }
 
-        // Notify clients that this item no longer exists
         notifyStockUpdated({ _id: req.params.id, isDeleted: true });
 
         return res.status(200).json({
@@ -303,23 +225,6 @@ exports.deleteMenuItem = async (req, res, next) => {
     }
 };
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// @desc   ORGANIZER / STAFF: Trigger "CANTEEN CHAOS!" Mode (60-min Hack Twist)
-//
-//         "The canteen has only 3 food items remaining!"
-//
-//         What this does:
-//           1. Marks ALL items as Out of Stock (stockQuantity = 0, isAvailable = false)
-//           2. Keeps ONLY the specified (or auto-picked top-3) items available
-//           3. Broadcasts chaos alert to every connected screen (menu, staff, display board)
-//
-//         Body params:
-//           remainingItemIds   — array of item _ids to keep active (optional; auto-picks top 3)
-//           stockPerItem       — how many portions each remaining item gets (default: 10)
-//           message            — custom announcement text
-// @route  POST /api/menu/chaos-mode
-// ──────────────────────────────────────────────────────────────────────────────
 exports.triggerChaosMode = async (req, res, next) => {
     try {
         const {
@@ -330,7 +235,6 @@ exports.triggerChaosMode = async (req, res, next) => {
 
         let activeIds = remainingItemIds;
 
-        // Auto-pick top 3 popular available items if none specified
         if (!Array.isArray(activeIds) || activeIds.length === 0) {
             const top3 = await MenuItem.find({ isAvailable: true })
                 .sort({ isPopular: -1, name: 1 })
@@ -345,13 +249,11 @@ exports.triggerChaosMode = async (req, res, next) => {
             });
         }
 
-        // Step 1: Mark EVERYTHING out of stock
         await MenuItem.updateMany(
             { _id: { $nin: activeIds } },
             { $set: { isAvailable: false, stockQuantity: 0 } }
         );
 
-        // Step 2: Re-enable only the selected items
         await MenuItem.updateMany(
             { _id: { $in: activeIds } },
             { $set: { isAvailable: true, stockQuantity: Number(stockPerItem) || 10 } }
@@ -374,7 +276,6 @@ exports.triggerChaosMode = async (req, res, next) => {
             triggeredAt: new Date(),
         };
 
-        // Broadcast to ALL connected clients (menu page, staff, display board)
         notifyChaosAlert(chaosPayload);
 
         return res.status(200).json({

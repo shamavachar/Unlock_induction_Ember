@@ -1,5 +1,3 @@
-// App Constants & Enums
-
 export const ORDER_STATUS = {
   WAITING: "Waiting",
   PREPARING: "Preparing",

@@ -40,7 +40,7 @@ export const MenuItemCard = ({ item }) => {
       }}
     >
       <div>
-        {/* Item Image with Badges */}
+
         <div
           style={{
             position: "relative",
@@ -84,7 +84,6 @@ export const MenuItemCard = ({ item }) => {
           </div>
         </div>
 
-        {/* Name & Details */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
           <h4 style={{ fontSize: "1.05rem", fontWeight: 600, color: "var(--color-text-main)" }}>
             {item.name}
@@ -112,7 +111,6 @@ export const MenuItemCard = ({ item }) => {
         )}
       </div>
 
-      {/* Footer Info & Add to Cart Controls */}
       <div
         style={{
           display: "flex",

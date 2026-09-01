@@ -1,16 +1,13 @@
-/* Canteen Rush Manager — Clean, Modern & Accessible Design System */
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
 :root {
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Color Palette */
   --color-primary: #ea580c;
   --color-primary-hover: #c2410c;
   --color-primary-light: #fff7ed;
-  
+
   --color-bg-main: #f8fafc;
   --color-bg-surface: #ffffff;
   --color-bg-subtle: #f1f5f9;
@@ -21,7 +18,6 @@
   --color-text-muted: #64748b;
   --color-text-subtle: #94a3b8;
 
-  /* Status Colors */
   --color-waiting-bg: #e0f2fe;
   --color-waiting-text: #0369a1;
   --color-waiting-border: #bae6fd;
@@ -42,12 +38,10 @@
   --color-cancelled-text: #be123c;
   --color-cancelled-border: #fecdd3;
 
-  /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
 
-  /* Radii */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
@@ -69,7 +63,6 @@ body {
   min-height: 100vh;
 }
 
-/* Links & Buttons Reset */
 a {
   color: inherit;
   text-decoration: none;
@@ -82,7 +75,6 @@ button {
   background: none;
 }
 
-/* Layout Utilities */
 .app-container {
   display: flex;
   flex-direction: column;
@@ -97,7 +89,6 @@ button {
   padding: 1.5rem 1rem;
 }
 
-/* Header & Nav */
 .header-nav {
   background: var(--color-bg-surface);
   border-bottom: 1px solid var(--color-border);
@@ -155,7 +146,6 @@ button {
   background: var(--color-primary-light);
 }
 
-/* Card Component */
 .card {
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border);
@@ -164,7 +154,6 @@ button {
   box-shadow: var(--shadow-sm);
 }
 
-/* Badges */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -244,7 +233,6 @@ button {
   border-radius: 50%;
 }
 
-/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -321,7 +309,6 @@ button {
   cursor: not-allowed;
 }
 
-/* Form Controls */
 .form-group {
   margin-bottom: 1rem;
 }
@@ -362,7 +349,6 @@ button {
   margin-top: 0.25rem;
 }
 
-/* Token Box */
 .token-box {
   font-family: var(--font-mono);
   font-size: 1.5rem;
@@ -376,7 +362,6 @@ button {
   border: 1px solid #1e293b;
 }
 
-/* Floating Cart Drawer */
 .cart-drawer-overlay {
   position: fixed;
   inset: 0;
@@ -420,7 +405,6 @@ button {
   background: var(--color-bg-subtle);
 }
 
-/* Modal */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -455,7 +439,6 @@ button {
   padding: 1.25rem;
 }
 
-/* Banner Alert */
 .chaos-alert-banner {
   background: #fef2f2;
   border-bottom: 1px solid #fee2e2;
@@ -470,7 +453,6 @@ button {
   gap: 0.5rem;
 }
 
-/* Kiosk & TV Display Styles */
 .tv-display-container {
   background: #090d16;
   color: #ffffff;
@@ -480,7 +462,6 @@ button {
   flex-direction: column;
 }
 
-/* Grid helper */
 .grid-responsive {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

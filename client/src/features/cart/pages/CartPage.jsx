@@ -72,7 +72,6 @@ export const CartPage = () => {
         </div>
       </div>
 
-      {/* Bill & Summary Box */}
       <div className="card" style={{ background: "var(--color-bg-subtle)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem", color: "var(--color-preparing-text)" }}>
           <Clock size={16} />

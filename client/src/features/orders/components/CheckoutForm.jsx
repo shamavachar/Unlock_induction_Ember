@@ -83,7 +83,6 @@ export const CheckoutForm = () => {
         </div>
       )}
 
-      {/* Student Details */}
       <div className="card" style={{ marginBottom: "1.25rem" }}>
         <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "1rem" }}>
           Student Pickup Details
@@ -112,7 +111,6 @@ export const CheckoutForm = () => {
         </div>
       </div>
 
-      {/* Payment Selection */}
       <div className="card" style={{ marginBottom: "1.25rem" }}>
         <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "1rem" }}>
           Select Payment Mode
@@ -157,7 +155,6 @@ export const CheckoutForm = () => {
         </div>
       </div>
 
-      {/* Place Order CTA */}
       <Button
         type="submit"
         variant="primary"

@@ -24,20 +24,18 @@ export const StudentLayout = () => {
 
   return (
     <div className="app-container">
-      {/* Top Rush Hour / Chaos Alert Banner */}
+
       <ChaosBanner />
 
-      {/* Main Student Header Nav */}
       <header className="header-nav">
         <div className="header-inner">
-          {/* Logo & Brand */}
+
           <Link to="/menu" className="brand-logo">
             <Utensils size={22} />
             <span>CanteenRush</span>
             <span className="brand-badge">Smart Campus</span>
           </Link>
 
-          {/* Navigation Links */}
           <nav className="nav-links">
             <Link
               to="/menu"
@@ -73,9 +71,8 @@ export const StudentLayout = () => {
             </Link>
           </nav>
 
-          {/* User & Cart CTA */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            {/* Cart Trigger Button */}
+
             <button
               onClick={() => dispatch(toggleCartDrawer(true))}
               className="btn btn-secondary btn-sm"
@@ -105,7 +102,6 @@ export const StudentLayout = () => {
               )}
             </button>
 
-            {/* Auth Actions */}
             {isAuthenticated ? (
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <span
@@ -138,12 +134,10 @@ export const StudentLayout = () => {
         </div>
       </header>
 
-      {/* Main Page Area */}
       <main className="main-content">
         <Outlet />
       </main>
 
-      {/* Slide-out Cart Drawer */}
       <CartDrawer />
     </div>
   );

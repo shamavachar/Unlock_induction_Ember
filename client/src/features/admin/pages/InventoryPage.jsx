@@ -35,7 +35,7 @@ export const InventoryPage = () => {
 
   return (
     <div style={{ paddingBottom: "3rem" }}>
-      {/* Top Header */}
+
       <div
         style={{
           display: "flex",
@@ -67,7 +67,6 @@ export const InventoryPage = () => {
         </div>
       </div>
 
-      {/* Search Input Bar */}
       <div className="card" style={{ marginBottom: "1.25rem", padding: "0.75rem 1rem" }}>
         <div style={{ position: "relative", maxWidth: "360px" }}>
           <Search size={16} style={{ position: "absolute", left: "10px", top: "10px", color: "var(--color-text-muted)" }} />
@@ -82,7 +81,6 @@ export const InventoryPage = () => {
         </div>
       </div>
 
-      {/* Stock Table */}
       <div className="card">
         {isLoading && items.length === 0 ? (
           <Loader message="Loading canteen inventory..." />
@@ -95,7 +93,6 @@ export const InventoryPage = () => {
         )}
       </div>
 
-      {/* Add / Edit Modal */}
       <MenuItemModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

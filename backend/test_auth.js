@@ -35,7 +35,7 @@ async function runAuthTests() {
     let menuItemId = null;
 
     try {
-        // 1. PUBLIC ROUTES
+
         section("1. PUBLIC ROUTES — No token needed");
         const menu = await req("GET", "/menu?availableOnly=true");
         if (menu.status !== 200) fail("Menu should be public");
@@ -50,7 +50,6 @@ async function runAuthTests() {
         if (track.status !== 404) fail("Should return 404 for unknown token");
         ok(`GET /api/orders/track/:token → public ✓ (404 for unknown token)`);
 
-        // 2. STUDENT SIGNUP
         section("2. STUDENT: SIGNUP (Register)");
         const reg = await req("POST", "/auth/register", {
             name: "Ananya Patel",
@@ -64,14 +63,12 @@ async function runAuthTests() {
         ok(`Registered: ${reg.data.user.name} (${reg.data.user.email})`);
         ok(`Student token issued ✓`);
 
-        // Duplicate email
         const dup = await req("POST", "/auth/register", {
             name: "Duplicate", email: "ananya@college.edu", password: "pass123",
         });
         if (dup.status !== 400) fail("Duplicate email should return 400");
         ok(`Duplicate email correctly rejected ✓`);
 
-        // 3. STUDENT LOGIN
         section("3. STUDENT: LOGIN");
         const login = await req("POST", "/auth/login", {
             email: "ananya@college.edu", password: "student123",
@@ -80,7 +77,6 @@ async function runAuthTests() {
         studentToken = login.data.token;
         ok(`Login successful: ${login.data.message}`);
 
-        // 4. ADMIN LOGIN (Predefined credentials)
         section("4. ADMIN: LOGIN");
         const adminLogin = await req("POST", "/auth/admin/login", {
             username: process.env.ADMIN_USERNAME || "canteen_admin",
@@ -90,7 +86,6 @@ async function runAuthTests() {
         adminToken = adminLogin.data.token;
         ok(`Admin login successful: ${adminLogin.data.message}`);
 
-        // 5. GET /auth/me
         section("5. GET /auth/me — Profile");
         const meStudent = await req("GET", "/auth/me", null, studentToken);
         if (meStudent.status !== 200) fail("Student /me failed");
@@ -100,7 +95,6 @@ async function runAuthTests() {
         if (meAdmin.status !== 200) fail("Admin /me failed");
         ok(`Admin profile: ${meAdmin.data.data.username} | ${meAdmin.data.data.role}`);
 
-        // 6. PROTECTED ROUTES WITHOUT TOKEN
         section("6. PROTECTED ROUTES — Blocked without token");
         const noAuth = await req("GET", "/orders");
         if (noAuth.status !== 401) fail("GET /orders should require admin token");
@@ -110,13 +104,11 @@ async function runAuthTests() {
         if (noAuthStats.status !== 401) fail("Stats should require token");
         ok(`GET /stats/dashboard without token → 401 ✓`);
 
-        // 7. STUDENT TOKEN ON ADMIN ROUTES
         section("7. STUDENT TOKEN — Cannot access admin routes");
         const studentOrders = await req("GET", "/orders", null, studentToken);
         if (studentOrders.status !== 403) fail("Student should get 403 on admin route");
         ok(`Student token on GET /orders → 403 Forbidden ✓`);
 
-        // 8. GUEST ORDER
         section("8. GUEST ORDER — Public order placement");
         const guestOrder = await req("POST", "/orders", {
             studentName: "Rohan Kumar",
@@ -126,7 +118,6 @@ async function runAuthTests() {
         if (guestOrder.status !== 201) fail(`Guest order failed: ${JSON.stringify(guestOrder.data)}`);
         ok(`Guest order placed: Token ${guestOrder.data.data.tokenNumber} ✓`);
 
-        // 9. LOGGED-IN STUDENT ORDER
         section("9. LOGGED-IN STUDENT ORDER — With token");
         const studentOrder = await req("POST", "/orders", {
             studentName: "Ananya Patel",
@@ -136,7 +127,6 @@ async function runAuthTests() {
         orderId = studentOrder.data.data._id;
         ok(`Logged-in student order: Token ${studentOrder.data.data.tokenNumber} ✓`);
 
-        // 10. ADMIN OPERATIONS
         section("10. ADMIN: Staff Operations");
         const allOrders = await req("GET", "/orders?status=active", null, adminToken);
         if (allOrders.status !== 200) fail("Admin GET /orders failed");

@@ -7,7 +7,6 @@ const { setupSwagger } = require("./config/swagger");
 
 const app = express();
 
-// Middleware
 app.use(cors({
     origin: "*",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
@@ -20,14 +19,11 @@ if (process.env.NODE_ENV !== "test") {
     app.use(morgan("dev"));
 }
 
-// Swagger API Documentation
 setupSwagger(app);
 app.get("/docs", (req, res) => res.redirect("/api-docs"));
 
-// API Routes
 app.use("/api", apiRoutes);
 
-// Root route
 app.get("/", (req, res) => {
     res.json({
         name: "Canteen Rush Manager API",
@@ -46,7 +42,6 @@ app.get("/", (req, res) => {
     });
 });
 
-// 404 handler for undefined routes
 app.use((req, res) => {
     res.status(404).json({
         success: false,
@@ -54,7 +49,6 @@ app.use((req, res) => {
     });
 });
 
-// Error handling middleware
 app.use(errorHandler);
 
 module.exports = app;

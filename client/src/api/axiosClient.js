@@ -10,7 +10,6 @@ const axiosClient = axios.create({
   timeout: 10000,
 });
 
-// Request Interceptor: Inject JWT Bearer Token if present
 axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -22,7 +21,6 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Extract response data or format clean error message
 axiosClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
@@ -32,7 +30,6 @@ axiosClient.interceptors.response.use(
       error.message ||
       "Something went wrong. Please try again.";
 
-    // If 401 Unauthorized, clear expired auth token
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
       if (!currentPath.includes("/login") && !currentPath.includes("/admin/login")) {

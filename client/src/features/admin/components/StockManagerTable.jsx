@@ -48,7 +48,7 @@ export const StockManagerTable = ({ items = [], onEditItem }) => {
                 opacity: !item.isAvailable ? 0.6 : 1,
               }}
             >
-              {/* Item Details */}
+
               <td style={{ padding: "0.75rem 0.5rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <VegBadge isVeg={item.isVeg} />
@@ -61,17 +61,14 @@ export const StockManagerTable = ({ items = [], onEditItem }) => {
                 </div>
               </td>
 
-              {/* Category */}
               <td style={{ padding: "0.75rem 0.5rem", color: "var(--color-text-muted)" }}>
                 {item.category}
               </td>
 
-              {/* Price */}
               <td style={{ padding: "0.75rem 0.5rem", fontWeight: 600 }}>
                 ₹{item.price}
               </td>
 
-              {/* Live Stock Stepper */}
               <td style={{ padding: "0.75rem 0.5rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                   <button
@@ -117,7 +114,6 @@ export const StockManagerTable = ({ items = [], onEditItem }) => {
                 </div>
               </td>
 
-              {/* Availability Toggle */}
               <td style={{ padding: "0.75rem 0.5rem" }}>
                 <button
                   onClick={() => handleToggle(item._id)}
@@ -141,7 +137,6 @@ export const StockManagerTable = ({ items = [], onEditItem }) => {
                 </button>
               </td>
 
-              {/* Actions */}
               <td style={{ padding: "0.75rem 0.5rem", textAlign: "right" }}>
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
                   <button

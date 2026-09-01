@@ -108,7 +108,7 @@ const orderSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Place Order
+
     builder
       .addCase(placeOrderThunk.pending, (state) => {
         state.isPlacingOrder = true;
@@ -123,7 +123,6 @@ const orderSlice = createSlice({
         state.error = action.payload;
       });
 
-    // Track Order
     builder
       .addCase(trackOrderThunk.pending, (state) => {
         state.isLoading = true;
@@ -138,7 +137,6 @@ const orderSlice = createSlice({
         state.error = action.payload;
       });
 
-    // Fetch Staff Orders
     builder
       .addCase(fetchStaffOrdersThunk.pending, (state) => {
         state.isLoading = true;
@@ -153,7 +151,6 @@ const orderSlice = createSlice({
         state.error = action.payload;
       });
 
-    // Update Status
     builder.addCase(updateOrderStatusThunk.fulfilled, (state, action) => {
       if (action.payload && action.payload._id) {
         const index = state.staffOrders.findIndex((o) => o._id === action.payload._id);
@@ -163,7 +160,6 @@ const orderSlice = createSlice({
       }
     });
 
-    // Cancel Order
     builder.addCase(cancelOrderThunk.fulfilled, (state, action) => {
       if (action.payload && action.payload._id) {
         const index = state.staffOrders.findIndex((o) => o._id === action.payload._id);

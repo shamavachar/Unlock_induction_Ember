@@ -37,12 +37,11 @@ export const CheckoutPage = () => {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "1.5rem", alignItems: "flex-start" }}>
-        {/* Left Column: Details & Payment Form */}
+
         <div>
           <CheckoutForm />
         </div>
 
-        {/* Right Column: Order Summary Card */}
         <div className="card" style={{ background: "var(--color-bg-subtle)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
             <ShoppingBag size={18} color="var(--color-primary)" />

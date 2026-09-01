@@ -19,7 +19,7 @@ export const SearchBar = () => {
         marginBottom: "1rem",
       }}
     >
-      {/* Search Input */}
+
       <div
         style={{
           position: "relative",
@@ -60,9 +60,8 @@ export const SearchBar = () => {
         )}
       </div>
 
-      {/* Filter Toggles */}
       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-        {/* Veg Only Toggle */}
+
         <label
           style={{
             display: "inline-flex",
@@ -88,7 +87,6 @@ export const SearchBar = () => {
           <span>Veg Only</span>
         </label>
 
-        {/* Available In-Stock Toggle */}
         <label
           style={{
             display: "inline-flex",

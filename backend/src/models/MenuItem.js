@@ -1,15 +1,8 @@
 const mongoose = require("mongoose");
 
-// ─────────────────────────────────────────────────────────────────
-// MenuItem Schema
-//
-// STOCK FLOW:  stockQuantity > 0  →  isAvailable = true
-//              stockQuantity = 0  →  isAvailable = false  (Out of Stock)
-//              Staff restocks     →  isAvailable = true   (back in menu)
-// ─────────────────────────────────────────────────────────────────
 const menuItemSchema = new mongoose.Schema(
     {
-        // ── Identity ─────────────────────────────────────────────────
+
         name: {
             type: String,
             required: [true, "Menu item name is required"],
@@ -22,7 +15,6 @@ const menuItemSchema = new mongoose.Schema(
             default: "",
         },
 
-        // ── Pricing & Category ────────────────────────────────────────
         price: {
             type: Number,
             required: [true, "Price is required"],
@@ -35,7 +27,6 @@ const menuItemSchema = new mongoose.Schema(
             default: "Snacks",
         },
 
-        // ── Display ───────────────────────────────────────────────────
         image: {
             type: String,
             default: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80",
@@ -49,24 +40,17 @@ const menuItemSchema = new mongoose.Schema(
             default: false,
         },
 
-        // ── Stock & Availability ──────────────────────────────────────
-        // This is the heart of the stock flow:
-        //   • Every order deducts from stockQuantity
-        //   • When stockQuantity hits 0, isAvailable is auto-set false
-        //   • Staff can manually restock (raises stockQuantity) or toggle isAvailable
         stockQuantity: {
             type: Number,
             default: 50,
             min: [0, "Stock cannot go below 0"],
         },
         isAvailable: {
-            // Derived from stock but can also be toggled manually by staff
-            // (e.g. staff can hide an item even when stock > 0)
+
             type: Boolean,
             default: true,
         },
 
-        // ── Kitchen ───────────────────────────────────────────────────
         preparationTimeMinutes: {
             type: Number,
             default: 5,
@@ -78,13 +62,10 @@ const menuItemSchema = new mongoose.Schema(
     }
 );
 
-// ── Indexes ───────────────────────────────────────────────────────────────────
-// Full-text search on name + category filter
 menuItemSchema.index({ name: "text" });
 menuItemSchema.index({ category: 1, isAvailable: -1 });
 menuItemSchema.index({ isAvailable: -1, isPopular: -1 });
 
-// ── Pre-save hook: auto-sync isAvailable when stockQuantity hits 0 ─────────────
 menuItemSchema.pre("save", function (next) {
     if (this.stockQuantity <= 0) {
         this.stockQuantity = 0;
