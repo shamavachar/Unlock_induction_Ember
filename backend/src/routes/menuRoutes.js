@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router();
+const router  = express.Router();
 
 const {
     getMenuItems,
@@ -13,31 +13,33 @@ const {
     triggerChaosMode,
 } = require("../controller/menuController");
 
-// ── Special routes BEFORE /:id to avoid matching conflicts ────────────────────
+const { protect, adminOnly } = require("../middleware/auth");
 
-// ORGANIZER: Activate Canteen Chaos Mode (60-min twist)
-router.post("/chaos-mode", triggerChaosMode);
+// ── Special routes BEFORE /:id ────────────────────────────────────────────────
 
-// STUDENT: Get all distinct categories for filter tabs
+// ORGANIZER: Chaos Mode — Admin only
+router.post("/chaos-mode", protect, adminOnly, triggerChaosMode);
+
+// STUDENT: Category filter tabs — Public
 router.get("/categories", getCategories);
 
 // ── Base routes ───────────────────────────────────────────────────────────────
 
 router.route("/")
-    .get(getMenuItems)      // STUDENT: View full menu
-    .post(createMenuItem);  // STAFF:   Add new item
+    .get(getMenuItems)                          // PUBLIC: Students view menu
+    .post(protect, adminOnly, createMenuItem);  // ADMIN:  Add new item
 
 // ── Item-specific routes ──────────────────────────────────────────────────────
 
 router.route("/:id")
-    .get(getMenuItemById)   // STAFF/STUDENT: Get item details
-    .put(updateMenuItem)    // STAFF:         Update item details
-    .delete(deleteMenuItem);// STAFF:         Remove item from menu
+    .get(getMenuItemById)                        // PUBLIC: View item details
+    .put(protect, adminOnly, updateMenuItem)     // ADMIN:  Edit item
+    .delete(protect, adminOnly, deleteMenuItem); // ADMIN:  Remove item
 
-// STAFF: Quick availability toggle (no stock change)
-router.patch("/:id/toggle", toggleAvailability);
+// ADMIN: Quick availability toggle
+router.patch("/:id/toggle", protect, adminOnly, toggleAvailability);
 
-// STAFF: Restock / update inventory count
-router.patch("/:id/stock",  updateStock);
+// ADMIN: Restock inventory count
+router.patch("/:id/stock",  protect, adminOnly, updateStock);
 
 module.exports = router;

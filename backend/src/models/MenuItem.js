@@ -85,12 +85,11 @@ menuItemSchema.index({ category: 1, isAvailable: -1 });
 menuItemSchema.index({ isAvailable: -1, isPopular: -1 });
 
 // ── Pre-save hook: auto-sync isAvailable when stockQuantity hits 0 ─────────────
-menuItemSchema.pre("save", function (next) {
+menuItemSchema.pre("save", function () {
     if (this.stockQuantity <= 0) {
         this.stockQuantity = 0;
         this.isAvailable = false;
     }
-    next();
 });
 
 const MenuItem = mongoose.model("MenuItem", menuItemSchema);

@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router();
+const router  = express.Router();
 
 const {
     createOrder,
@@ -10,27 +10,33 @@ const {
     cancelOrder,
 } = require("../controller/orderController");
 
+const { protect, adminOnly, optionalAuth } = require("../middleware/auth");
+
 // ── Special routes BEFORE /:id ────────────────────────────────────────────────
 
-// STUDENT: Track order by token number (e.g. CR-101) or Mongo ObjectId
-// Must come before /:id to avoid "track" being treated as an id
+// PUBLIC: Track order by token number (students check their order status)
+// No auth needed — anyone with the token can track
 router.get("/track/:tokenOrId", trackOrder);
 
 // ── Base routes ───────────────────────────────────────────────────────────────
 
 router.route("/")
-    .post(createOrder)  // STUDENT: Place a new order
-    .get(getOrders);    // STAFF:   View all orders (with filters)
+    // PUBLIC (with optional auth): Place an order
+    // optionalAuth → if logged in, req.user is available; if guest, still works
+    .post(optionalAuth, createOrder)
+
+    // ADMIN: View all orders with filters
+    .get(protect, adminOnly, getOrders);
 
 // ── Order-specific routes ─────────────────────────────────────────────────────
 
-router.route("/:id")
-    .get(getOrderById); // STAFF/STUDENT: Get single order details
+// ADMIN: Get single order details
+router.get("/:id", protect, adminOnly, getOrderById);
 
-// STAFF: Move order through the flow — Waiting → Preparing → Ready → Completed
-router.patch("/:id/status", updateOrderStatus);
+// ADMIN: Move order through the flow — Waiting → Preparing → Ready → Completed
+router.patch("/:id/status", protect, adminOnly, updateOrderStatus);
 
-// STAFF/STUDENT: Cancel order (stock is automatically restored)
-router.patch("/:id/cancel", cancelOrder);
+// ADMIN: Cancel order (stock automatically restored)
+router.patch("/:id/cancel", protect, adminOnly, cancelOrder);
 
 module.exports = router;
