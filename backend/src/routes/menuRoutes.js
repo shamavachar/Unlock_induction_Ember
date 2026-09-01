@@ -13,6 +13,8 @@ const {
     triggerChaosMode,
 } = require("../controller/menuController");
 
+const { protect, adminOnly } = require("../middleware/auth");
+
 // ── Special routes BEFORE /:id to avoid matching conflicts ────────────────────
 
 /**
@@ -46,7 +48,7 @@ const {
  *       400:
  *         description: Bad request
  */
-router.post("/chaos-mode", triggerChaosMode);
+router.post("/chaos-mode", protect, adminOnly, triggerChaosMode);
 
 /**
  * @openapi
@@ -150,8 +152,8 @@ router.get("/categories", getCategories);
  *         description: Validation error
  */
 router.route("/")
-    .get(getMenuItems)      // STUDENT: View full menu
-    .post(createMenuItem);  // STAFF:   Add new item
+    .get(getMenuItems)                          // STUDENT: View full menu
+    .post(protect, adminOnly, createMenuItem);  // STAFF:   Add new item
 
 // ── Item-specific routes ──────────────────────────────────────────────────────
 
@@ -221,9 +223,9 @@ router.route("/")
  *         description: Menu item not found
  */
 router.route("/:id")
-    .get(getMenuItemById)   // STAFF/STUDENT: Get item details
-    .put(updateMenuItem)    // STAFF:         Update item details
-    .delete(deleteMenuItem);// STAFF:         Remove item from menu
+    .get(getMenuItemById)                        // STAFF/STUDENT: Get item details
+    .put(protect, adminOnly, updateMenuItem)     // STAFF:         Update item details
+    .delete(protect, adminOnly, deleteMenuItem); // STAFF:         Remove item from menu
 
 /**
  * @openapi
@@ -244,7 +246,7 @@ router.route("/:id")
  *       404:
  *         description: Menu item not found
  */
-router.patch("/:id/toggle", toggleAvailability);
+router.patch("/:id/toggle", protect, adminOnly, toggleAvailability);
 
 /**
  * @openapi
@@ -278,6 +280,6 @@ router.patch("/:id/toggle", toggleAvailability);
  *       404:
  *         description: Menu item not found
  */
-router.patch("/:id/stock",  updateStock);
+router.patch("/:id/stock",  protect, adminOnly, updateStock);
 
 module.exports = router;

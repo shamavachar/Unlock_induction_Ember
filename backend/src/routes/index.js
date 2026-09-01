@@ -1,12 +1,14 @@
 const express = require("express");
 const router  = express.Router();
 
+const authRoutes  = require("./authRoutes");
 const menuRoutes  = require("./menuRoutes");
 const orderRoutes = require("./orderRoutes");
 const queueRoutes = require("./queueRoutes");
 const statsRoutes = require("./statsRoutes");
 
 // Mount all API route groups
+router.use("/auth",   authRoutes);
 router.use("/menu",   menuRoutes);
 router.use("/orders", orderRoutes);
 router.use("/queue",  queueRoutes);

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const User = require("../models/User");
 const MenuItem = require("../models/MenuItem");
 const Order = require("../models/Order");
 const TokenCounter = require("../models/TokenCounter");
@@ -13,7 +14,8 @@ const seedDatabase = async () => {
         console.log(`Connecting to MongoDB at: ${uri}`);
         await mongoose.connect(uri);
 
-        console.log("Cleaning existing menu, order, and counter data...");
+        console.log("Cleaning existing users, menu, order, and counter data...");
+        await User.deleteMany({});
         await MenuItem.deleteMany({});
         await Order.deleteMany({});
         await TokenCounter.deleteMany({});

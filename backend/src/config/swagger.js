@@ -31,6 +31,10 @@ const swaggerOptions = {
         ],
         tags: [
             {
+                name: "Auth",
+                description: "Student signup & login, Admin/staff login, and profile retrieval",
+            },
+            {
                 name: "Health",
                 description: "API server health check",
             },
@@ -207,6 +211,14 @@ const swaggerOptions = {
                         success: { type: "boolean", example: false },
                         message: { type: "string", example: "Error details here" },
                     },
+                },
+            },
+            securitySchemes: {
+                bearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT",
+                    description: "Enter your JWT token in the format: Bearer <token>",
                 },
             },
         },

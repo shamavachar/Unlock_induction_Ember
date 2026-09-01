@@ -10,6 +10,8 @@ const {
     cancelOrder,
 } = require("../controller/orderController");
 
+const { protect, adminOnly, optionalAuth } = require("../middleware/auth");
+
 // ── Special routes BEFORE /:id ────────────────────────────────────────────────
 
 /**
@@ -131,8 +133,8 @@ router.get("/track/:tokenOrId", trackOrder);
  *                     $ref: '#/components/schemas/Order'
  */
 router.route("/")
-    .post(createOrder)  // STUDENT: Place a new order
-    .get(getOrders);    // STAFF:   View all orders (with filters)
+    .post(optionalAuth, createOrder)  // STUDENT/GUEST: Place a new order
+    .get(protect, adminOnly, getOrders);    // STAFF:   View all orders (with filters)
 
 // ── Order-specific routes ─────────────────────────────────────────────────────
 
@@ -165,7 +167,7 @@ router.route("/")
  *         description: Order not found
  */
 router.route("/:id")
-    .get(getOrderById); // STAFF/STUDENT: Get single order details
+    .get(protect, adminOnly, getOrderById); // STAFF: Get single order details
 
 /**
  * @openapi
@@ -203,7 +205,7 @@ router.route("/:id")
  *       404:
  *         description: Order not found
  */
-router.patch("/:id/status", updateOrderStatus);
+router.patch("/:id/status", protect, adminOnly, updateOrderStatus);
 
 /**
  * @openapi
@@ -235,6 +237,6 @@ router.patch("/:id/status", updateOrderStatus);
  *       404:
  *         description: Order not found
  */
-router.patch("/:id/cancel", cancelOrder);
+router.patch("/:id/cancel", protect, adminOnly, cancelOrder);
 
 module.exports = router;

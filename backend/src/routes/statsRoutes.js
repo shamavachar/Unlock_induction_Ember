@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { getDashboardStats } = require("../controller/statsController");
+const { protect, adminOnly } = require("../middleware/auth");
 
 /**
  * @openapi
@@ -55,6 +56,6 @@ const { getDashboardStats } = require("../controller/statsController");
  *                           items:
  *                             type: object
  */
-router.get("/dashboard", getDashboardStats);
+router.get("/dashboard", protect, adminOnly, getDashboardStats);
 
 module.exports = router;
