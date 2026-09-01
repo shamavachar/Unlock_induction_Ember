@@ -13,6 +13,32 @@ router.use("/queue",  queueRoutes);
 router.use("/stats",  statsRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
+/**
+ * @openapi
+ * /health:
+ *   get:
+ *     summary: API health and endpoint check
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Server is online and operational
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Canteen Rush Manager API is running 🚀"
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *                 endpoints:
+ *                   type: object
+ */
 router.get("/health", (req, res) => {
     res.status(200).json({
         success:   true,

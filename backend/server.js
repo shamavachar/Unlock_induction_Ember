@@ -26,6 +26,7 @@ const startServer = async () => {
             console.log(`🚀 Canteen Rush Manager Backend Running!`);
             console.log(`📡 Port: ${PORT}`);
             console.log(`🌐 URL: http://localhost:${PORT}`);
+            console.log(`📚 Swagger Docs: http://localhost:${PORT}/api-docs`);
             console.log(`🔌 WebSockets: Ready for Real-Time Orders`);
             console.log(`=========================================`);
         });
