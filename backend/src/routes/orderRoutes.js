@@ -134,7 +134,7 @@ router.get("/track/:tokenOrId", trackOrder);
  */
 router.route("/")
     .post(optionalAuth, createOrder)  // STUDENT/GUEST: Place a new order
-    .get(protect, adminOnly, getOrders);    // STAFF:   View all orders (with filters)
+    .get(protect, getOrders);         // STAFF / STUDENT: View orders (auto-scoped for student)
 
 // ── Order-specific routes ─────────────────────────────────────────────────────
 

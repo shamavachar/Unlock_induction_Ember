@@ -1,5 +1,6 @@
 const Order = require("../models/Order");
 const MenuItem = require("../models/MenuItem");
+const User = require("../models/User");
 const TokenCounter = require("../models/TokenCounter");
 const { calculateEstimatedWaitTime, getQueuePosition } = require("../utils/queueEstimator");
 const { notifyNewOrder, notifyOrderStatusUpdated, notifyStockUpdated } = require("../sockets/socketHandler");
@@ -244,6 +245,32 @@ exports.getOrders = async (req, res, next) => {
                 { studentName:      { $regex: s, $options: "i" } },
                 { studentRollNumber: { $regex: s, $options: "i" } },
             ];
+        }
+
+        // If a student is fetching orders, scope to their own orders only
+        if (req.user && req.user.role === "student") {
+            const studentUser = await User.findById(req.user.id);
+            if (studentUser) {
+                const userOrFilters = [
+                    { studentName: studentUser.name },
+                ];
+                if (studentUser.rollNumber) {
+                    userOrFilters.push({ studentRollNumber: studentUser.rollNumber });
+                }
+                if (studentUser.phone) {
+                    userOrFilters.push({ studentPhone: studentUser.phone });
+                }
+
+                if (query.$or) {
+                    query.$and = [
+                        { $or: query.$or },
+                        { $or: userOrFilters }
+                    ];
+                    delete query.$or;
+                } else {
+                    query.$or = userOrFilters;
+                }
+            }
         }
 
         const skip  = (Number(page) - 1) * Number(limit);

@@ -51,7 +51,9 @@ export const CheckoutForm = () => {
       paymentMethod: data.paymentMethod,
       notes: notes,
       items: items.map((item) => ({
-        menuItem: item.menuItemId,
+        menuItemId: item.menuItemId || item._id,
+        _id: item.menuItemId || item._id,
+        menuItem: item.menuItemId || item._id,
         quantity: item.quantity,
       })),
     };

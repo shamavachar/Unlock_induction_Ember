@@ -14,9 +14,9 @@ export const OrderHistoryPage = () => {
     const fetchOrders = async () => {
       try {
         setIsLoading(true);
-        // Student view orders
         const res = await orderService.getOrders({ limit: 20 });
-        setOrders(res.data || []);
+        const ordersList = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+        setOrders(ordersList);
       } catch (err) {
         setError(err.message);
       } finally {
