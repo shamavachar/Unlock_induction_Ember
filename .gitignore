@@ -6,11 +6,6 @@ yarn-error.log*
 package-lock.json
 
 # ── Environment Variables (NEVER commit secrets) ──────────────────────────────
-.env
-.env.local
-.env.development
-.env.production
-.env.test
 
 # ── Logs ──────────────────────────────────────────────────────────────────────
 logs/
